@@ -26,9 +26,8 @@ export function ProductCard({ scored, selectedForCompare, tracked, onToggleCompa
         <ProductArt category={product.category} size={60} />
         <div>
           <h4>{product.name}</h4>
-          <p className="muted small">{product.packSize}</p>
-          <p className="price">
-            {formatPrice(product.price)} <span className="muted small">illustrative · {formatUnitPrice(product)}</span>
+          <p className="muted small">
+            {product.brand} · {product.packSize}
           </p>
         </div>
         <div className={`score score-${scoreTone(score.total)}`} aria-label={`Demo WorthIt score ${score.total} out of 100`}>
@@ -36,6 +35,14 @@ export function ProductCard({ scored, selectedForCompare, tracked, onToggleCompa
           <span>demo score</span>
         </div>
       </div>
+
+      <p className="price-tag">
+        <b>{formatPrice(product.price)}</b>
+        <span>
+          {formatUnitPrice(product)}
+          <small>illustrative price</small>
+        </span>
+      </p>
 
       <ul className="feature-list" aria-label="Features">
         {product.features.map((f) => (

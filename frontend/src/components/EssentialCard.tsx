@@ -1,7 +1,8 @@
-import { ExternalLink, Minus, Pencil, PackageMinus, Trash2 } from 'lucide-react';
+import { ExternalLink, Minus, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import type { Essential } from '../types';
 import { daysLeftFor, describeDaysLeft, formatQuantity, getStatus, runOutDate } from '../utils/essentials';
+import { findDemoProduct, formatUnitPrice } from '../services/mockAssistant';
 import { ProductArt } from './ProductArt';
 import { StatusBadge } from './StatusBadge';
 
@@ -23,37 +24,37 @@ export function EssentialCard({ item, onUpdateQuantity, onUseOne, onEdit, onDele
   const fill = days === null ? 0 : Math.max(4, Math.min(100, (days / 30) * 100));
   const hasActions = onUpdateQuantity || onEdit || onDelete;
 
+  const product = findDemoProduct(item.productId);
+
   return (
-    <article className="card essential-card">
-      <div className="essential-top">
-        <ProductArt category={item.category} />
-        <div className="essential-title">
+    <article className={`shelf-tag status-${status}`}>
+      <StatusBadge status={status} variant="ribbon" />
+      <header className="tag-head">
+        <ProductArt category={item.category} size={44} />
+        <div className="tag-title">
+          <span className="tag-category">{item.category}</span>
           <h3>{item.name}</h3>
-          <span className="muted small">{item.category}</span>
         </div>
-      </div>
+      </header>
 
-      <StatusBadge status={status} />
-
-      <dl className="essential-stats">
-        <div>
-          <dt>Remaining</dt>
-          <dd>
+      <div className="tag-price">
+        <p className="tag-days">
+          <b>{days === null ? '—' : days}</b>
+          <span>{days === 1 ? 'day left' : 'days left'}</span>
+        </p>
+        <p className="tag-meta">
+          <b>
             {formatQuantity(item.remainingQuantity)} {item.unit}
-          </dd>
-        </div>
-        <div>
-          <dt>Estimated days left</dt>
-          <dd>{days === null ? '—' : days}</dd>
-        </div>
-      </dl>
+          </b>
+          <span>{product ? formatUnitPrice(product) : 'remaining'}</span>
+        </p>
+      </div>
 
       <div className={`meter meter-${status}`} aria-hidden="true">
         <span style={{ width: `${fill}%` }} />
       </div>
-      <p className="muted small estimate-note">
-        {describeDaysLeft(days)}
-        {date ? `, around ${date}` : ''} · estimate
+      <p className="tag-foot">
+        {days === null ? 'No estimate yet' : date ? `Runs out around ${date}` : describeDaysLeft(days)} · estimate
       </p>
 
       {item.productUrl && (
@@ -86,11 +87,11 @@ export function EssentialCard({ item, onUpdateQuantity, onUseOne, onEdit, onDele
           )}
           {onUpdateQuantity && (
             <button type="button" className="button secondary small" onClick={() => onUpdateQuantity(item)}>
-              <PackageMinus size={16} aria-hidden="true" /> Update
+              Update
             </button>
           )}
           {onEdit && (
-            <button type="button" className="icon-button" onClick={() => onEdit(item)} aria-label={`Edit ${item.name}`}>
+            <button type="button" className="icon-button push-right" onClick={() => onEdit(item)} aria-label={`Edit ${item.name}`}>
               <Pencil size={18} aria-hidden="true" />
             </button>
           )}

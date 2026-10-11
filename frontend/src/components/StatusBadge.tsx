@@ -4,11 +4,12 @@ import { STATUS_LABELS } from '../utils/essentials';
 
 const ICONS = { good: CheckCircle2, low: Clock, review: AlertCircle };
 
-export function StatusBadge({ status }: { status: EssentialStatus }) {
+/** "pill" for lists, "ribbon" for the corner flag on a shelf tag. */
+export function StatusBadge({ status, variant = 'pill' }: { status: EssentialStatus; variant?: 'pill' | 'ribbon' }) {
   const Icon = ICONS[status];
   return (
-    <span className={`badge badge-${status}`}>
-      <Icon size={14} aria-hidden="true" />
+    <span className={variant === 'ribbon' ? `tag-ribbon ribbon-${status}` : `badge badge-${status}`}>
+      <Icon size={13} aria-hidden="true" />
       {STATUS_LABELS[status]}
     </span>
   );

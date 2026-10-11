@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { EssentialFormModal } from './components/EssentialFormModal';
-import { BottomNav, MobileHeader, Sidebar } from './components/Navigation';
+import { BottomNav, TopBar } from './components/Navigation';
 import { ToastProvider } from './components/Toast';
 import { AppDataProvider, useAppData } from './context/AppDataContext';
 import { useHashRoute, type View } from './hooks/useHashRoute';
@@ -59,8 +59,7 @@ function Shell() {
       <button type="button" className="skip-link" onClick={() => mainRef.current?.focus()}>
         Skip to content
       </button>
-      <Sidebar current={view} pendingReorders={pending} />
-      <MobileHeader />
+      <TopBar current={view} pendingReorders={pending} />
       <main id="main-content" ref={mainRef} tabIndex={-1} className="main">
         {view === 'dashboard' && <Dashboard navigate={navigate} openForm={openForm} />}
         {view === 'essentials' && <Essentials openForm={openForm} />}

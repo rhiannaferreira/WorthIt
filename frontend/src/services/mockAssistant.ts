@@ -32,6 +32,11 @@ export const EXAMPLE_PROMPTS = [
   'Find paper towels that are good value.',
 ];
 
+/** Looks up a demo catalog product, e.g. for an essential tracked from the assistant. */
+export function findDemoProduct(id?: string): Product | undefined {
+  return id ? DEMO_PRODUCTS.find((p) => p.id === id) : undefined;
+}
+
 export function pricePerUnit(product: Product): number {
   return product.price / product.unitCount;
 }

@@ -140,7 +140,7 @@ export function Reorders({ navigate }: { navigate: (view: View) => void }) {
                               <dt>Quantity</dt>
                               <dd>{p.quantity}</dd>
                             </div>
-                            <div>
+                            <div className="fact-price">
                               <dt>Illustrative price</dt>
                               <dd>{formatPrice(p.illustrativePrice * p.quantity)}</dd>
                             </div>

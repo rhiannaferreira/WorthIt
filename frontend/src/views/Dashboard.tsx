@@ -34,7 +34,7 @@ export function Dashboard({ navigate, openForm }: DashboardProps) {
       <header className="page-header">
         <div>
           <p className="eyebrow">{greeting()}</p>
-          <h1>Your household at a glance</h1>
+          <h1>This week’s shelf check</h1>
           <p className="muted">Forecasts are estimates based on the usage you entered.</p>
         </div>
         <div className="header-actions">
