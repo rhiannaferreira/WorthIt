@@ -1,9 +1,10 @@
-import { BellRing, CheckCircle2, ClipboardCheck, Clock, Info, Loader2, XCircle } from 'lucide-react';
+import { BellRing, CheckCircle2, ClipboardCheck, Clock, Info, Loader2, PackageCheck, XCircle } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { EmptyState } from '../components/EmptyState';
 import { ProductArt } from '../components/ProductArt';
 import { ErrorState, InlineError, LoadingState } from '../components/StateMessages';
 import { useToast } from '../components/Toast';
+import { UpdateQuantityModal } from '../components/UpdateQuantityModal';
 import { useAppData } from '../context/AppDataContext';
 import type { View } from '../hooks/useHashRoute';
 import type { Category, ReorderProposal, ReorderStatus } from '../types';
@@ -23,7 +24,10 @@ function formatDate(iso?: string) {
 }
 
 export function Reorders({ navigate }: { navigate: (view: View) => void }) {
-  const { proposals, essentials, loading, error, reload, approveReorder, dismissReorder, remindLater } = useAppData();
+  const { proposals, essentials, loading, error, reload, approveReorder, dismissReorder, remindLater, markReorderReceived } =
+    useAppData();
+  const [arrival, setArrival] = useState<ReorderProposal | null>(null);
+  const arrivalItem = arrival ? essentials.find((e) => e.id === arrival.essentialId) : undefined;
   const toast = useToast();
   // Which proposal is being processed, so its buttons are disabled and can't be clicked twice.
   const [busy, setBusy] = useState<{ id: string; action: Action } | null>(null);
@@ -78,7 +82,7 @@ export function Reorders({ navigate }: { navigate: (view: View) => void }) {
         <Info size={20} aria-hidden="true" />
         <p>
           <strong>Approval is simulated.</strong> Approving a demo reorder doesn’t buy anything, contact a store, or charge you.
-          It also doesn’t change your remaining stock; update quantities on the Essentials page when items arrive. Prices are
+          It also doesn’t change your remaining stock; use “Mark as arrived” when a delivery shows up. Prices are
           illustrative.
         </p>
       </div>
@@ -151,7 +155,15 @@ export function Reorders({ navigate }: { navigate: (view: View) => void }) {
                           {p.status === 'approved' && (
                             <p className="muted small">
                               Approved in demo on {formatDate(p.decidedAt)}. No order was placed.
+                              {p.receivedAt && ` Marked as arrived on ${formatDate(p.receivedAt)}.`}
                             </p>
+                          )}
+                          {p.status === 'approved' && !p.receivedAt && essentials.some((e) => e.id === p.essentialId) && (
+                            <div className="card-actions">
+                              <button type="button" className="button secondary small" onClick={() => setArrival(p)}>
+                                <PackageCheck size={16} aria-hidden="true" /> Mark as arrived
+                              </button>
+                            </div>
                           )}
                           {p.status === 'dismissed' && (
                             <p className="muted small">Dismissed on {formatDate(p.decidedAt)}.</p>
@@ -201,6 +213,16 @@ export function Reorders({ navigate }: { navigate: (view: View) => void }) {
             </section>
           );
         })
+      )}
+
+      {arrival && arrivalItem && (
+        <UpdateQuantityModal
+          item={arrivalItem}
+          title="Mark as arrived"
+          note={`Enter how many ${arrivalItem.unit} of ${arrivalItem.name} you have now that ${arrival.packSize} arrived.`}
+          onSaved={() => markReorderReceived(arrival.id)}
+          onClose={() => setArrival(null)}
+        />
       )}
     </div>
   );

@@ -8,7 +8,17 @@ import { Modal } from './Modal';
 import { InlineError } from './StateMessages';
 import { useToast } from './Toast';
 
-export function UpdateQuantityModal({ item, onClose }: { item: Essential; onClose: () => void }) {
+interface UpdateQuantityModalProps {
+  item: Essential;
+  onClose: () => void;
+  title?: string;
+  /** Extra text under the title, e.g. which delivery arrived. */
+  note?: string;
+  /** Runs after the quantity is saved. */
+  onSaved?: (quantity: number) => Promise<void> | void;
+}
+
+export function UpdateQuantityModal({ item, onClose, title = 'Update remaining quantity', note, onSaved }: UpdateQuantityModalProps) {
   const { updateEssential } = useAppData();
   const toast = useToast();
   const [value, setValue] = useState(formatQuantity(item.remainingQuantity));
@@ -34,6 +44,7 @@ export function UpdateQuantityModal({ item, onClose }: { item: Essential; onClos
     setSaving(true);
     try {
       await updateEssential(item.id, { remainingQuantity: quantity });
+      await onSaved?.(quantity);
       toast(`Updated ${item.name} to ${formatQuantity(quantity)} ${item.unit}.`);
       onClose();
     } catch (err) {
@@ -44,8 +55,8 @@ export function UpdateQuantityModal({ item, onClose }: { item: Essential; onClos
 
   return (
     <Modal
-      title="Update remaining quantity"
-      description={item.name}
+      title={title}
+      description={note ?? item.name}
       onClose={onClose}
       size="small"
       busy={saving}

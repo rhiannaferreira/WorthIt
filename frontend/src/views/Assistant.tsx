@@ -1,4 +1,4 @@
-import { GitCompare, Info, Lightbulb, Send, Sparkles, X } from 'lucide-react';
+import { GitCompare, Info, Lightbulb, Send, Sparkles, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { OpenEssentialForm } from '../App';
 import { CompareModal } from '../components/CompareModal';
@@ -83,6 +83,22 @@ export function Assistant({ openForm }: { openForm: OpenEssentialForm }) {
           <h1>Shopping assistant</h1>
           <p className="muted">Describe what you need and your budget. I’ll compare options from the demo catalog.</p>
         </div>
+        {chat.length > 0 && (
+          <div className="header-actions">
+            <button
+              type="button"
+              className="button secondary"
+              disabled={sending}
+              onClick={() => {
+                setChat([]);
+                setCompare([]);
+                setError(null);
+              }}
+            >
+              <Trash2 size={18} aria-hidden="true" /> Clear chat
+            </button>
+          </div>
+        )}
       </header>
 
       <div className="notice" role="note">

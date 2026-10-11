@@ -1,10 +1,10 @@
-import { Bell, Link2Off, RotateCcw, Save, Wallet } from 'lucide-react';
+import { Bell, Link2Off, Monitor, Moon, Palette, RotateCcw, Save, Sun, Wallet } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { ErrorState, InlineError, LoadingState } from '../components/StateMessages';
 import { useToast } from '../components/Toast';
 import { useAppData } from '../context/AppDataContext';
-import type { Settings } from '../types';
+import type { Settings, ThemePreference } from '../types';
 
 interface FormState {
   monthlyBudget: string;
@@ -35,6 +35,16 @@ export function SettingsView() {
     if (settings) setForm(toForm(settings));
   }, [settings]);
 
+  // Appearance saves right away so you can see the change immediately.
+  async function changeTheme(theme: ThemePreference) {
+    if (!settings || settings.theme === theme) return;
+    try {
+      await saveSettings({ ...settings, theme });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Could not save the theme.');
+    }
+  }
+
   const dirty = form && settings ? JSON.stringify(form) !== JSON.stringify(toForm(settings)) : false;
 
   function setNotification<K extends keyof Settings['notifications']>(key: K, value: Settings['notifications'][K]) {
@@ -59,7 +69,7 @@ export function SettingsView() {
     setSaving(true);
     setFormError(null);
     try {
-      await saveSettings({ monthlyBudget, itemPriceLimit, preferEcoFriendly: form.preferEcoFriendly, notifications: form.notifications });
+      await saveSettings({ theme: settings?.theme ?? 'system', monthlyBudget, itemPriceLimit, preferEcoFriendly: form.preferEcoFriendly, notifications: form.notifications });
       toast('Settings saved on this device.');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Could not save settings.');
@@ -188,6 +198,34 @@ export function SettingsView() {
           </form>
 
           <aside className="settings-side">
+            <section className="card settings-section" aria-labelledby="appearance-heading">
+              <h2 id="appearance-heading">
+                <Palette size={20} aria-hidden="true" /> Appearance
+              </h2>
+              <fieldset className="segmented">
+                <legend className="visually-hidden">Theme</legend>
+                {(
+                  [
+                    ['light', 'Light', Sun],
+                    ['dark', 'Dark', Moon],
+                    ['system', 'System', Monitor],
+                  ] as const
+                ).map(([value, label, Icon]) => (
+                  <label key={value} className={settings?.theme === value ? 'selected' : undefined}>
+                    <input
+                      type="radio"
+                      name="theme"
+                      value={value}
+                      checked={settings?.theme === value}
+                      onChange={() => changeTheme(value)}
+                    />
+                    <Icon size={16} aria-hidden="true" /> {label}
+                  </label>
+                ))}
+              </fieldset>
+              <p className="muted small">System follows your device’s light or dark mode.</p>
+            </section>
+
             <section className="card settings-section" aria-labelledby="amazon-heading">
               <h2 id="amazon-heading">
                 <Link2Off size={20} aria-hidden="true" /> Amazon integration

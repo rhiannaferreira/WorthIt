@@ -303,6 +303,7 @@ export function createDemoEssentials(): Essential[] {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  theme: 'system',
   monthlyBudget: 120,
   itemPriceLimit: null,
   preferEcoFriendly: false,

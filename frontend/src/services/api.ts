@@ -14,6 +14,7 @@
 import { createDemoEssentials, DEFAULT_SETTINGS, DEMO_PRODUCTS } from '../data/demoData';
 import type {
   Category,
+  ChatMessage,
   ChatResponse,
   Essential,
   EssentialInput,
@@ -219,6 +220,15 @@ export async function approveReorder(id: string): Promise<ReorderProposal> {
   }
 }
 
+/** Records that an approved demo reorder arrived. Stock is updated separately by the user. */
+export async function markReorderReceived(id: string): Promise<ReorderProposal> {
+  await wait(NETWORK_DELAY_MS);
+  return setDecision(id, (p) => {
+    if (p.status !== 'approved') throw new Error('Only approved reorders can be marked as arrived.');
+    return p.receivedAt ? p : { ...p, receivedAt: new Date().toISOString() };
+  });
+}
+
 export async function dismissReorder(id: string): Promise<ReorderProposal> {
   await wait(NETWORK_DELAY_MS);
   return setDecision(id, (p) => {
@@ -259,6 +269,21 @@ export async function sendChatMessage(message: string): Promise<ChatResponse> {
   return buildMockResponse(trimmed, { settings: loadSettings(), trackedProductIds });
 }
 
+const MAX_SAVED_MESSAGES = 60;
+
+/** Chat history saved in this browser so it survives a refresh. */
+export function getChatHistorySync(): ChatMessage[] {
+  return readJson<ChatMessage[]>(STORAGE_KEYS.chat) ?? [];
+}
+
+export function saveChatHistory(messages: ChatMessage[]): void {
+  try {
+    writeJson(STORAGE_KEYS.chat, messages.slice(-MAX_SAVED_MESSAGES));
+  } catch {
+    // Chat history is a convenience; keep working if it can't be saved.
+  }
+}
+
 // ---------- settings ----------
 
 function loadSettings(): Settings {
@@ -268,6 +293,11 @@ function loadSettings(): Settings {
     ...stored,
     notifications: { ...DEFAULT_SETTINGS.notifications, ...stored?.notifications },
   };
+}
+
+/** Synchronous read of the saved theme, used once at startup to avoid a flash of the wrong theme. */
+export function getSavedThemeSync(): Settings['theme'] {
+  return loadSettings().theme;
 }
 
 export async function getSettings(): Promise<Settings> {

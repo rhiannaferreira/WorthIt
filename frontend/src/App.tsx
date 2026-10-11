@@ -5,6 +5,7 @@ import { ToastProvider } from './components/Toast';
 import { AppDataProvider, useAppData } from './context/AppDataContext';
 import { useHashRoute, type View } from './hooks/useHashRoute';
 import type { Essential, EssentialInput } from './types';
+import { applyTheme } from './utils/theme';
 import { Assistant } from './views/Assistant';
 import { Dashboard } from './views/Dashboard';
 import { Essentials } from './views/Essentials';
@@ -29,7 +30,7 @@ const TITLES: Record<View, string> = {
 
 function Shell() {
   const { view, navigate } = useHashRoute();
-  const { proposals } = useAppData();
+  const { proposals, settings } = useAppData();
   const [formRequest, setFormRequest] = useState<EssentialFormRequest | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const pending = proposals.filter((p) => p.status === 'awaiting').length;
@@ -45,6 +46,10 @@ function Shell() {
     window.scrollTo({ top: 0 });
     mainRef.current?.focus();
   }, [view]);
+
+  useEffect(() => {
+    if (settings) applyTheme(settings.theme);
+  }, [settings]);
 
   const openForm: OpenEssentialForm = (request = {}) => setFormRequest(request);
 

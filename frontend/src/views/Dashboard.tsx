@@ -1,5 +1,6 @@
 import { AlertCircle, ArrowRight, ClipboardCheck, MessageCircle, Package, PackageOpen, Plus } from 'lucide-react';
 import type { OpenEssentialForm } from '../App';
+import { BudgetCard } from '../components/BudgetCard';
 import { EmptyState } from '../components/EmptyState';
 import { EssentialCard } from '../components/EssentialCard';
 import { ProductArt } from '../components/ProductArt';
@@ -21,7 +22,7 @@ function greeting() {
 }
 
 export function Dashboard({ navigate, openForm }: DashboardProps) {
-  const { essentials, proposals, loading, error, reload } = useAppData();
+  const { essentials, proposals, settings, loading, error, reload } = useAppData();
 
   const lowCount = essentials.filter((e) => getStatus(e) !== 'good').length;
   const pending = proposals.filter((p) => p.status === 'awaiting');
@@ -108,32 +109,35 @@ export function Dashboard({ navigate, openForm }: DashboardProps) {
               )}
             </section>
 
-            <section aria-labelledby="pending-heading" className="pending-panel card">
-              <div className="section-header">
-                <h2 id="pending-heading">Pending reorders</h2>
-                <span className="demo-pill">Demo</span>
-              </div>
-              {pending.length === 0 ? (
-                <p className="muted">No suggestions waiting. We’ll suggest a reorder when something gets close to running out.</p>
-              ) : (
-                <ul className="pending-list">
-                  {pending.slice(0, 4).map((p) => (
-                    <li key={p.id}>
-                      <ProductArt category={categoryFor(p.essentialId)} size={44} />
-                      <div>
-                        <strong>{p.productName}</strong>
-                        <span className="muted small">
-                          {p.packSize} · {formatPrice(p.illustrativePrice)} (illustrative)
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <button type="button" className="button secondary full" onClick={() => navigate('reorders')}>
-                Review suggestions <ArrowRight size={16} aria-hidden="true" />
-              </button>
-            </section>
+            <div className="dashboard-side">
+              {settings && <BudgetCard proposals={proposals} settings={settings} onEditBudget={() => navigate('settings')} />}
+              <section aria-labelledby="pending-heading" className="pending-panel card">
+                <div className="section-header">
+                  <h2 id="pending-heading">Pending reorders</h2>
+                  <span className="demo-pill">Demo</span>
+                </div>
+                {pending.length === 0 ? (
+                  <p className="muted">No suggestions waiting. We’ll suggest a reorder when something gets close to running out.</p>
+                ) : (
+                  <ul className="pending-list">
+                    {pending.slice(0, 4).map((p) => (
+                      <li key={p.id}>
+                        <ProductArt category={categoryFor(p.essentialId)} size={44} />
+                        <div>
+                          <strong>{p.productName}</strong>
+                          <span className="muted small">
+                            {p.packSize} · {formatPrice(p.illustrativePrice)} (illustrative)
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <button type="button" className="button secondary full" onClick={() => navigate('reorders')}>
+                  Review suggestions <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              </section>
+            </div>
           </div>
         </>
       )}

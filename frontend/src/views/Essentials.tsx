@@ -9,16 +9,25 @@ import { useToast } from '../components/Toast';
 import { UpdateQuantityModal } from '../components/UpdateQuantityModal';
 import { useAppData } from '../context/AppDataContext';
 import { CATEGORIES, type Essential, type EssentialStatus } from '../types';
-import { byUrgency, getStatus, STATUS_LABELS } from '../utils/essentials';
+import { byUrgency, formatQuantity, getStatus, STATUS_LABELS } from '../utils/essentials';
 
 type StatusFilter = 'all' | EssentialStatus;
 
+type SortKey = 'urgency' | 'name' | 'updated';
+
+const SORTS: Record<SortKey, { label: string; compare: (a: Essential, b: Essential) => number }> = {
+  urgency: { label: 'Most urgent first', compare: byUrgency },
+  name: { label: 'Name (A–Z)', compare: (a, b) => a.name.localeCompare(b.name) },
+  updated: { label: 'Recently updated', compare: (a, b) => b.updatedAt.localeCompare(a.updatedAt) },
+};
+
 export function Essentials({ openForm }: { openForm: OpenEssentialForm }) {
-  const { essentials, loading, error, reload, deleteEssential } = useAppData();
+  const { essentials, loading, error, reload, deleteEssential, updateEssential } = useAppData();
   const toast = useToast();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [sort, setSort] = useState<SortKey>('urgency');
   const [quantityItem, setQuantityItem] = useState<Essential | null>(null);
   const [deleteItem, setDeleteItem] = useState<Essential | null>(null);
 
@@ -27,7 +36,7 @@ export function Essentials({ openForm }: { openForm: OpenEssentialForm }) {
     .filter((e) => !search || e.name.toLowerCase().includes(search) || e.category.toLowerCase().includes(search))
     .filter((e) => category === 'all' || e.category === category)
     .filter((e) => status === 'all' || getStatus(e) === status)
-    .sort(byUrgency);
+    .sort(SORTS[sort].compare);
 
   const filtersActive = search !== '' || category !== 'all' || status !== 'all';
 
@@ -89,6 +98,16 @@ export function Essentials({ openForm }: { openForm: OpenEssentialForm }) {
             <label htmlFor="category-filter" className="visually-hidden">
               Filter by category
             </label>
+            <label htmlFor="sort-order" className="visually-hidden">
+              Sort essentials
+            </label>
+            <select id="sort-order" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+              {(Object.keys(SORTS) as SortKey[]).map((key) => (
+                <option key={key} value={key}>
+                  {SORTS[key].label}
+                </option>
+              ))}
+            </select>
             <select id="category-filter" value={category} onChange={(e) => setCategory(e.target.value)}>
               <option value="all">All categories</option>
               {CATEGORIES.map((c) => (
@@ -139,6 +158,15 @@ export function Essentials({ openForm }: { openForm: OpenEssentialForm }) {
                   key={item.id}
                   item={item}
                   onUpdateQuantity={setQuantityItem}
+                  onUseOne={async (e) => {
+                    try {
+                      const next = Math.max(0, Math.round((e.remainingQuantity - 1) * 100) / 100);
+                      await updateEssential(e.id, { remainingQuantity: next });
+                      toast(`${e.name}: ${formatQuantity(next)} ${e.unit} left.`);
+                    } catch (err) {
+                      toast(err instanceof Error ? err.message : 'Could not update the quantity.');
+                    }
+                  }}
                   onEdit={(e) => openForm({ item: e })}
                   onDelete={setDeleteItem}
                 />

@@ -28,9 +28,10 @@ interface AppData {
   approveReorder: (id: string) => Promise<void>;
   dismissReorder: (id: string) => Promise<void>;
   remindLater: (id: string) => Promise<void>;
+  markReorderReceived: (id: string) => Promise<void>;
   saveSettings: (settings: Settings) => Promise<void>;
   resetDemoData: () => Promise<void>;
-  /** Chat history is kept in memory so it survives switching views. */
+  /** Chat history, saved in this browser so it survives switching views and refreshing. */
   chat: ChatMessage[];
   setChat: Dispatch<SetStateAction<ChatMessage[]>>;
 }
@@ -43,7 +44,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [chat, setChat] = useState<ChatMessage[]>([]);
+  const [chat, setChat] = useState<ChatMessage[]>(api.getChatHistorySync);
+
+  useEffect(() => {
+    api.saveChatHistory(chat);
+  }, [chat]);
 
   // Suggestions depend on essentials, so refresh them after any essentials change.
   const refreshProposals = useCallback(async () => {
@@ -104,6 +109,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const approveReorder = useCallback(async (id: string) => replaceProposal(await api.approveReorder(id)), []);
   const dismissReorder = useCallback(async (id: string) => replaceProposal(await api.dismissReorder(id)), []);
   const remindLater = useCallback(async (id: string) => replaceProposal(await api.remindLater(id)), []);
+  const markReorderReceived = useCallback(async (id: string) => replaceProposal(await api.markReorderReceived(id)), []);
 
   const saveSettings = useCallback(async (next: Settings) => {
     setSettings(await api.saveSettings(next));
@@ -129,13 +135,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       approveReorder,
       dismissReorder,
       remindLater,
+      markReorderReceived,
       saveSettings,
       resetDemoData,
       chat,
       setChat,
     }),
     [essentials, proposals, settings, loading, error, reload, addEssential, updateEssential, deleteEssential,
-      approveReorder, dismissReorder, remindLater, saveSettings, resetDemoData, chat],
+      approveReorder, dismissReorder, remindLater, markReorderReceived, saveSettings, resetDemoData, chat],
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;

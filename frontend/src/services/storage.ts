@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   essentials: `${PREFIX}essentials.v1`,
   reorders: `${PREFIX}reorders.v1`,
   settings: `${PREFIX}settings.v1`,
+  chat: `${PREFIX}chat.v1`,
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

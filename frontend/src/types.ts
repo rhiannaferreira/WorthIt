@@ -56,6 +56,8 @@ export interface ReorderProposal {
   decidedAt?: string;
   /** Only set when status is "snoozed". */
   remindAt?: string;
+  /** Set when the user marks an approved demo reorder as arrived and updates their stock. */
+  receivedAt?: string;
 }
 
 /** A product in the local demo catalog. Brands are fictional. */
@@ -118,7 +120,10 @@ export interface ChatMessage {
   response?: ChatResponse;
 }
 
+export type ThemePreference = 'system' | 'light' | 'dark';
+
 export interface Settings {
+  theme: ThemePreference;
   /** Monthly budget for household essentials, in USD. */
   monthlyBudget: number;
   /** Default price limit the assistant uses when a message has no budget. Empty = no limit. */

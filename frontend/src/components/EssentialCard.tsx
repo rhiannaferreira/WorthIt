@@ -1,4 +1,5 @@
-import { ExternalLink, Pencil, PackageMinus, Trash2 } from 'lucide-react';
+import { ExternalLink, Minus, Pencil, PackageMinus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import type { Essential } from '../types';
 import { daysLeftFor, describeDaysLeft, formatQuantity, getStatus, runOutDate } from '../utils/essentials';
 import { ProductArt } from './ProductArt';
@@ -7,11 +8,14 @@ import { StatusBadge } from './StatusBadge';
 interface EssentialCardProps {
   item: Essential;
   onUpdateQuantity?: (item: Essential) => void;
+  /** Subtracts one unit. */
+  onUseOne?: (item: Essential) => Promise<void>;
   onEdit?: (item: Essential) => void;
   onDelete?: (item: Essential) => void;
 }
 
-export function EssentialCard({ item, onUpdateQuantity, onEdit, onDelete }: EssentialCardProps) {
+export function EssentialCard({ item, onUpdateQuantity, onUseOne, onEdit, onDelete }: EssentialCardProps) {
+  const [using, setUsing] = useState(false);
   const status = getStatus(item);
   const days = daysLeftFor(item);
   const date = runOutDate(days);
@@ -61,9 +65,28 @@ export function EssentialCard({ item, onUpdateQuantity, onEdit, onDelete }: Esse
 
       {hasActions && (
         <div className="card-actions">
+          {onUseOne && (
+            <button
+              type="button"
+              className="button secondary small"
+              disabled={using || item.remainingQuantity <= 0}
+              onClick={async () => {
+                setUsing(true);
+                try {
+                  await onUseOne(item);
+                } finally {
+                  setUsing(false);
+                }
+              }}
+              aria-label={`Used one: subtract 1 from ${item.name}`}
+              title="Used one"
+            >
+              <Minus size={16} aria-hidden="true" /> 1
+            </button>
+          )}
           {onUpdateQuantity && (
             <button type="button" className="button secondary small" onClick={() => onUpdateQuantity(item)}>
-              <PackageMinus size={16} aria-hidden="true" /> Update quantity
+              <PackageMinus size={16} aria-hidden="true" /> Update
             </button>
           )}
           {onEdit && (

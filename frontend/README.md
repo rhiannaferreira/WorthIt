@@ -82,4 +82,8 @@ To connect a real endpoint, replace the body of a function with a `fetch` call a
 8. Assistant: try each example prompt, see the loading indicator, product cards, the demo verdict, and a fallback for something like "a laptop".
 9. Compare two products side by side; Track a product and see it on the Essentials page.
 10. Settings: change the budget, save, refresh, and see it kept. Reset demo data restores everything.
-11. Resize to phone width: bottom navigation appears and nothing scrolls sideways. Tab through a dialog: focus stays inside and Escape closes it.
+11. Approve a reorder, then use **Mark as arrived** to enter the new stock; the dashboard budget card shows the approved amount.
+12. Use the **−1** button on an essential and the sort menu on the Essentials page.
+13. Refresh the assistant page: the chat is still there. **Clear chat** empties it.
+14. Settings → Appearance: switch between Light, Dark and System.
+15. Resize to phone width: bottom navigation appears and nothing scrolls sideways. Tab through a dialog: focus stays inside and Escape closes it.
