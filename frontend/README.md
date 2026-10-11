@@ -4,6 +4,10 @@ React + TypeScript + Vite prototype for WorthIt: track household essentials, rev
 
 Everything runs in the browser with demo data. There are no real purchases, no Amazon sign-in, no cloud resources and no paid API calls.
 
+## Live site
+
+Every push to `feature/frontend` publishes the app to https://rhiannaferreira.github.io/WorthIt/ (see `.github/workflows/deploy-frontend.yml`).
+
 ## Run it
 
 Requires Node 20.19+ (or 22.12+).
